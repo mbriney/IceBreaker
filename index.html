@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d4d47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Icebreaker">
+<meta name="description" content="A party game for your phone with 6,000+ icebreaker questions. Play live with a join code, pass one phone around, or text a challenge.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Icebreaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a game night — warm, quick, a little cheeky; the questions do the talking.
+   IDEA: a card table. Teal felt ground, oversized playing cards dealt one at a time.
+   PICTURE: the card itself, centered and big, colored by its category.
+   COLOUR and TYPE: felt teal dominant, ivory cards, coral accent; Fraunces on cards, Outfit for everything else.
+   LAYOUT: one phone column; header, the card or list, a thumb-reach action bar pinned to the bottom. */
+:root{color-scheme:light dark;
+  --felt:light-dark(#0f5a52,#0a2f2c);--felt2:light-dark(#0c4b45,#072421);
+  --card:light-dark(#fffdf8,#1d2826);--ink:light-dark(#14211f,#eef4f2);--soft:light-dark(#5d6d6a,#9fb2ae);
+  --on:#f2fbf9;--onsoft:#bfe0da;--line:light-dark(#e6e1d6,#2c3a37);--acc:#ff6b4a;--acc2:#ffb347}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(120% 80% at 50% 0%,var(--felt) 0%,var(--felt2) 100%) fixed;color:var(--on);
+  font:16px/1.5 Outfit,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:clip}
+#app{min-height:100dvh;display:flex;flex-direction:column;max-width:560px;margin:0 auto;
+  padding:max(env(safe-area-inset-top),12px) max(env(safe-area-inset-right),16px) 0 max(env(safe-area-inset-left),16px)}
+header{display:flex;align-items:center;gap:10px;min-height:48px}
+header h1{font:700 22px/1 Fraunces,Georgia,serif;margin:0;flex:1;letter-spacing:-.01em}
+header .sub{color:var(--onsoft);font-size:14px}
+main{flex:1;display:flex;flex-direction:column;gap:16px;padding:8px 0 20px}
+.bar{position:sticky;bottom:0;display:flex;gap:10px;padding:12px 0 max(env(safe-area-inset-bottom),14px);
+  background:linear-gradient(transparent,var(--felt2) 30%);z-index:5}
+button,.btn{font:600 17px/1 Outfit,system-ui,sans-serif;min-height:52px;border-radius:16px;border:0;padding:0 18px;cursor:pointer;
+  background:var(--acc);color:#fff;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.btn:focus-visible{outline:3px solid var(--acc2);outline-offset:2px}
+button.ghost,.btn.ghost{background:rgba(255,255,255,.12);color:var(--on)}
+button.small{min-height:44px;font-size:15px;flex:none;border-radius:12px}
+button:disabled{opacity:.45;cursor:default}
+button.icon{flex:none;width:44px;min-height:44px;padding:0;background:rgba(255,255,255,.12);border-radius:12px;font-size:22px}
+input,textarea{font:16px/1.4 Outfit,system-ui,sans-serif;width:100%;border-radius:14px;border:2px solid transparent;padding:14px;
+  background:var(--card);color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-weight:600;margin:0 0 6px}
+.panel{background:rgba(0,0,0,.18);border-radius:20px;padding:16px}
+.panel h2,.h2{font:600 19px/1.2 Fraunces,Georgia,serif;margin:0 0 10px}
+.muted{color:var(--onsoft);font-size:15px}
+.hero{padding:18px 4px 4px}
+.hero .big{font:700 clamp(40px,13vw,56px)/1 Fraunces,Georgia,serif;margin:0;letter-spacing:-.02em}
+.hero p{color:var(--onsoft);margin:10px 0 0;max-width:34ch}
+.fan{position:relative;height:190px;margin:8px 0 0}
+.fan i{position:absolute;left:50%;top:14px;width:116px;height:160px;border-radius:14px;background:var(--card);
+  box-shadow:0 10px 24px rgba(0,0,0,.28);transform-origin:50% 120%}
+.fan i::before{content:"";position:absolute;inset:0 0 auto;height:44px;border-radius:14px 14px 0 0;background:var(--c)}
+.fan i::after{content:"?";position:absolute;inset:44px 0 0;display:grid;place-items:center;font:700 54px Fraunces,serif;color:var(--c)}
+.menu{display:grid;gap:12px}
+.menu button{justify-content:flex-start;text-align:left;padding:14px 16px;min-height:76px;flex-direction:column;align-items:flex-start;gap:4px;
+  background:var(--card);color:var(--ink)}
+.menu button b{font-size:18px}.menu button span{font-weight:400;font-size:14px;color:var(--soft);line-height:1.3}
+.menu button.lead{background:var(--acc);color:#fff}.menu button.lead span{color:#ffe7e0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto;min-height:44px;font-size:15px;border-radius:12px;background:rgba(255,255,255,.1);color:var(--on);padding:0 12px}
+.seg button[aria-pressed=true]{background:var(--on);color:#0c4b45}
+.row{display:flex;gap:10px;align-items:center}
+.switch{display:flex;align-items:center;gap:12px;min-height:44px;cursor:pointer}
+.switch input{width:52px;height:30px;appearance:none;background:rgba(255,255,255,.2);border-radius:20px;position:relative;flex:none;padding:0;border:0}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s}
+.switch input:checked{background:var(--acc)}.switch input:checked::after{left:25px}
+.players{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.players li{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:14px;padding:8px 8px 8px 12px;min-height:52px}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;background:var(--c)}
+.players li .n{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:13px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.14);white-space:nowrap}
+.tag.ok{background:#2fb67c;color:#fff}.tag.off{background:rgba(0,0,0,.25);color:var(--onsoft)}
+.code{font:700 clamp(48px,16vw,72px)/1 Fraunces,Georgia,serif;letter-spacing:.12em;text-align:center;margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cat{min-height:96px;border-radius:16px;background:var(--c);color:#fff;text-align:left;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  padding:12px;gap:2px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.cat b{font-size:17px;line-height:1.15}.cat span{font-weight:400;font-size:13px;opacity:.9;line-height:1.25}
+.cat.surprise{background:repeating-linear-gradient(135deg,#ff6b4a 0 18px,#ffb347 18px 36px)}
+.cat[aria-pressed=true]{outline:3px solid #fff;outline-offset:2px}
+.sect{font-weight:600;color:var(--onsoft);margin:6px 2px 0;font-size:14px}
+.card{position:relative;background:var(--card);color:var(--ink);border-radius:24px;overflow:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.32),0 2px 0 rgba(255,255,255,.6) inset;min-height:min(56dvh,440px);display:flex;flex-direction:column}
+.card .top{background:var(--c);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:600}
+.card .top small{font-weight:500;opacity:.9}
+.card .q{flex:1;display:flex;align-items:center;padding:24px 22px;font:600 clamp(24px,7vw,32px)/1.2 Fraunces,Georgia,serif;text-wrap:balance}
+.card .foot{padding:0 18px 16px;color:var(--soft);font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.card .corner{position:absolute;right:18px;bottom:44px;font:700 64px/1 Fraunces,serif;color:var(--c);opacity:.12;pointer-events:none}
+.deal{animation:deal .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes deal{from{transform:translateY(40px) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.deal{animation:none}.switch input::after{transition:none}}
+.answers{display:grid;gap:10px}
+.ans{background:var(--card);color:var(--ink);border-radius:16px;padding:12px 14px;border-left:6px solid var(--c)}
+.ans b{display:block;font-size:14px;color:var(--soft);margin-bottom:2px}
+.ans p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.locked{filter:blur(7px);user-select:none}
+.notice{background:rgba(0,0,0,.28);border-radius:14px;padding:12px 14px;color:var(--onsoft);font-size:15px}
+.notice.warn{background:#7a2b18;color:#ffe4dc}
+.center{text-align:center}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.list li{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;font-size:15px}
+.list li b{display:block;font-size:13px;color:var(--onsoft);font-weight:600}
+.err{color:#ffd1c4;font-size:15px;min-height:1.4em}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+</style>
+</head>
+<body>
+<div id="app"><main><p class="muted">Loading questions…</p></main></div>
+<script src="questions.js"></script>
+<script src="peerjs.min.js" defer></script>
+<script>
+{
+const D = window.ICEBREAKER;
+const CAT = Object.fromEntries(D.cats.map(c => [c.id, c]));
+const TOTAL = D.cats.reduce((n, c) => n + c.count, 0);
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Names, players, answers and settings live in memory only and are gone when the tab closes.
+// The one thing cached on the device is which questions you've already seen (question numbers only),
+// so cards don't repeat across visits.
+const mem = {};
+const store = { get: (k, d) => (k in mem ? mem[k] : d), set: (k, v) => { mem[k] = v; } };
+const seen = {
+  load() { try { return JSON.parse(localStorage.getItem('ib-seen') || '[]'); } catch (e) { return []; } },
+  save(a) { try { localStorage.setItem('ib-seen', JSON.stringify(a.slice(-5000))); } catch (e) {} }
+};
+const COLORS = ['#ff7a59','#7c5cff','#00b3b3','#e8a317','#2a8bdc','#f25c94','#30a46c','#e5484d','#9b51e0','#4c6ef5','#f76b15','#d6409f','#12a594','#ad7f58','#8e4ec6','#3e63dd'];
+const REDRAWS = 2;
+const PEER_OPTS = window.IB_PEER || { debug: 0 };
+const rid = () => Math.random().toString(36).slice(2, 10);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pickOne = a => a[Math.floor(Math.random() * a.length)];
+const ME = rid() + rid();
+let myName = store.get('name', '');
+let prefs = Object.assign({ deal: 'mix', answers: 'talk', adult: false, per: 1 }, store.get('prefs', {}));
+const cats = adult => D.cats.filter(c => adult || !c.adult);
+
+/* ---------- deck: no repeats on this device until a category runs out ---------- */
+const used = new Set(seen.load());
+const groupSeen = new Set();   // live games: cards any player in the room has already seen
+const markSeen = k => { if (k && !used.has(k)) { used.add(k); seen.save([...used]); } };
+function draw(cat) {
+  const qs = D.q[cat];
+  const fresh = i => !used.has(cat + ':' + i) && !groupSeen.has(cat + ':' + i);
+  let pool = qs.map((_, i) => i).filter(fresh);
+  if (!pool.length) {                       // the group has seen every card here: start this category over
+    for (const k of [...used]) if (k.startsWith(cat + ':')) used.delete(k);
+    for (const k of [...groupSeen]) if (k.startsWith(cat + ':')) groupSeen.delete(k);
+    pool = qs.map((_, i) => i);
+  }
+  const i = pickOne(pool), key = cat + ':' + i;
+  markSeen(key); groupSeen.add(key);
+  return { cat, text: qs[i], key };
+}
+
+/* ---------- game engine (runs on the host phone, or locally for one-phone play) ---------- */
+function newGame(host, settings) {
+  return { phase: 'lobby', host, settings: { ...settings }, players: [], picks: {}, queue: [], turn: 0, answers: {}, revealed: false, round: 0 };
+}
+const active = g => g.players.filter(p => p.on);
+const curCard = g => g.queue[g.turn];
+function startRound(g) { g.round++; g.picks = {}; g.queue = []; g.turn = 0; g.answers = {}; g.revealed = false; g.phase = 'pick'; }
+function deal(g) {
+  const ps = active(g), pool = cats(g.settings.adult).map(c => c.id);
+  const picks = ps.map(p => g.picks[p.id] || pickOne(pool));
+  const n = ps.length, mode = g.settings.deal;
+  const first = mode === 'own' ? picks : mode === 'next' ? ps.map((_, i) => picks[(i - 1 + n) % n]) : shuffle([...picks]);
+  g.queue = [];
+  for (let r = 0; r < g.settings.per; r++)
+    ps.forEach((p, i) => g.queue.push({ owner: p.id, by: mode === 'next' ? ps[(i - 1 + n) % n].id : null, redraws: 0, ...draw(r === 0 ? first[i] : pickOne(picks)) }));
+  g.turn = 0; g.answers = {}; g.revealed = false; g.phase = 'play';
+}
+function act(g, id, a) {
+  const isHost = id === g.host, card = curCard(g), owner = card && card.owner === id;
+  switch (a.t) {
+    case 'join': {
+      const name = String(a.name || 'Player').trim().slice(0, 20) || 'Player';
+      const p = g.players.find(p => p.id === id);
+      if (p) { p.name = name; p.on = true; return true; }
+      if (g.players.length >= 16) return false;
+      const taken = new Set(g.players.map(p => p.color));
+      g.players.push({ id, name, color: COLORS.find(c => !taken.has(c)) || pickOne(COLORS), on: true });
+      if (g.phase === 'play' && g.settings.answers === 'type') {} // joins mid-round; answers on next card
+      return true;
+    }
+    case 'leave': { const p = g.players.find(p => p.id === id); if (p) p.on = false; checkProgress(g); return true; }
+    case 'kick': if (!isHost) return false; g.players = g.players.filter(p => p.id !== a.id); delete g.picks[a.id]; checkProgress(g); return true;
+    case 'settings': if (!isHost || g.phase !== 'lobby') return false; Object.assign(g.settings, a.s); return true;
+    case 'start': case 'round': if (!isHost || active(g).length < 2) return false; startRound(g); return true;
+    case 'lobby': if (!isHost) return false; g.phase = 'lobby'; return true;
+    case 'pick':
+      if (g.phase !== 'pick' || !cats(g.settings.adult).some(c => c.id === a.cat)) return false;
+      g.picks[id] = a.cat; checkProgress(g); return true;
+    case 'forceDeal': if (!isHost || g.phase !== 'pick') return false; deal(g); return true;
+    case 'answer':
+      if (g.phase !== 'play' || g.revealed) return false;
+      g.answers[id] = String(a.text || '').trim().slice(0, 600) || '(passed)'; checkProgress(g); return true;
+    case 'reveal': if (!(isHost || owner) || g.phase !== 'play') return false; g.revealed = true; return true;
+    case 'redraw':
+      if (!(isHost || owner) || g.phase !== 'play' || !card || card.redraws >= REDRAWS || g.revealed) return false;
+      Object.assign(card, draw(card.cat), { redraws: card.redraws + 1 }); g.answers = {}; return true;
+    case 'next':
+      if (!(isHost || owner) || g.phase !== 'play') return false;
+      g.turn++; g.answers = {}; g.revealed = false;
+      if (g.turn >= g.queue.length) g.phase = 'end';
+      return true;
+  }
+  return false;
+}
+function checkProgress(g) {
+  const ps = active(g);
+  if (g.phase === 'pick' && ps.length && ps.every(p => g.picks[p.id])) deal(g);
+  if (g.phase === 'play' && g.settings.answers === 'type' && !g.revealed && ps.length && ps.every(p => g.answers[p.id] != null)) g.revealed = true;
+}
+function publicState(g) {
+  return { ...g, answered: Object.keys(g.answers), answers: g.revealed ? g.answers : {}, picks: Object.fromEntries(Object.keys(g.picks).map(k => [k, true])) };
+}
+
+/* ---------- session ---------- */
+let view = 'home', mode = null, G = null, peer = null, conns = new Map(), conn = null, code = '', status = '', err = '', wake = null, chOut = null, chIn = null, lastCardKey = '';
+const go = v => { view = v; err = ''; render(); window.scrollTo(0, 0); };
+const isHostView = () => mode === 'local' || mode === 'host';
+const meId = () => mode === 'local' ? null : ME;
+
+function send(a, as = ME) {
+  if (mode === 'client') { if (conn && conn.open) conn.send(a); else { status = 'Reconnecting…'; render(); } return; }
+  if (act(G, as, a)) { broadcast(); render(); }
+}
+function broadcast() {
+  if (mode !== 'host') return;
+  const s = publicState(G);
+  for (const c of conns.values()) if (c.open) c.send({ t: 'state', s });
+}
+const peerId = c => 'icebreaker-mb-' + c;
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const newCode = () => Array.from({ length: 4 }, () => pickOne(CODE_CHARS)).join('');
+
+async function keepAwake() { try { if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (mode === 'host' || mode === 'client')) { keepAwake(); if (mode === 'client' && (!conn || !conn.open)) joinGame(code); } });
+
+function needPeer() {
+  if (!window.Peer) { err = 'Live play needs an internet connection. Try again in a moment.'; render(); return false; }
+  return true;
+}
+function hostGame() {
+  if (!needPeer()) return;
+  mode = 'host'; code = newCode(); groupSeen.clear(); G = newGame(ME, prefs); act(G, ME, { t: 'join', name: myName });
+  status = 'Opening room…'; go('game');
+  peer && peer.destroy();
+  peer = new Peer(peerId(code), PEER_OPTS);
+  peer.on('open', () => { status = ''; keepAwake(); render(); });
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id') { code = newCode(); peer.destroy(); hostGame(); return; }
+    if (e.type === 'peer-unavailable') return;
+    status = 'Connection trouble: ' + (e.type || 'network') + '. Players may need to rejoin.'; render();
+  });
+  peer.on('disconnected', () => { status = 'Reconnecting room…'; render(); try { peer.reconnect(); } catch (e) {} });
+  peer.on('connection', c => {
+    let pid = null;
+    c.on('data', a => {
+      if (!a || typeof a !== 'object') return;
+      if (a.t === 'join') {
+        pid = String(a.id || '').slice(0, 20); if (!pid) return; conns.set(pid, c);
+        if (Array.isArray(a.seen)) for (const k of a.seen.slice(-5000)) if (typeof k === 'string' && /^[a-z]+:\d+$/.test(k)) groupSeen.add(k);
+      }
+      if (!pid) return;
+      if (act(G, pid, a)) { broadcast(); render(); } else if (a.t === 'join') c.send({ t: 'state', s: publicState(G) });
+    });
+    c.on('close', () => { if (pid && conns.get(pid) === c) { conns.delete(pid); act(G, pid, { t: 'leave' }); broadcast(); render(); } });
+  });
+}
+function joinGame(c) {
+  if (!needPeer()) return;
+  c = String(c || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
+  if (c.length !== 4) { err = 'Codes are 4 letters.'; render(); return; }
+  if (!myName.trim()) { err = 'Add your name first.'; render(); return; }
+  mode = 'client'; code = c; status = 'Connecting to ' + c + '…'; if (view !== 'game') go('game'); else render();
+  if (!peer || peer.destroyed) {
+    peer = new Peer(PEER_OPTS);
+    peer.on('error', e => {
+      if (e.type === 'peer-unavailable') { mode = null; G = null; view = 'join'; err = 'No game found with code ' + code + '. Check the code, or ask the host to keep their screen on.'; render(); return; }
+      status = 'Connection trouble (' + (e.type || 'network') + '). Tap Rejoin.'; render();
+    });
+    peer.on('open', () => connect());
+  } else connect();
+}
+function connect() {
+  conn = peer.connect(peerId(code), { reliable: true });
+  conn.on('open', () => { status = ''; conn.send({ t: 'join', id: ME, name: myName, seen: [...used] }); keepAwake(); render(); });
+  conn.on('data', m => { if (m && m.t === 'state') { G = m.s; status = ''; if (G.phase === 'play') { const c = curCard(G); if (c) markSeen(c.key); } render(); } });
+  conn.on('close', () => { if (mode === 'client') { status = 'Lost connection to the host.'; render(); } });
+}
+function leaveGame() {
+  if (mode === 'client' && conn && conn.open) conn.send({ t: 'leave' });
+  try { peer && peer.destroy(); } catch (e) {}
+  peer = null; conn = null; conns.clear(); groupSeen.clear(); mode = null; G = null; status = ''; try { wake && wake.release(); } catch (e) {}
+  history.replaceState(null, '', location.pathname); go('home');
+}
+function startLocal() {
+  mode = 'local'; G = newGame('local', { ...prefs, answers: 'talk' });
+  for (const n of store.get('localPlayers', [])) act(G, rid(), { t: 'join', name: n });
+  go('game');
+}
+
+/* ---------- text-a-challenge links ---------- */
+/* Challenge links are encrypted with AES-GCM. The ciphertext rides in the query string (?ch=);
+   the key rides in the fragment (#k=), which browsers never send to any server. */
+const toB64 = u8 => { let s = ''; for (const b of u8) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const fromB64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+async function seal(obj) {
+  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj))));
+  const raw = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+  const blob = new Uint8Array(iv.length + ct.length); blob.set(iv); blob.set(ct, iv.length);
+  return { ch: toB64(blob), k: toB64(raw) };
+}
+async function unseal(ch, k) {
+  const blob = fromB64(ch), key = await crypto.subtle.importKey('raw', fromB64(k), 'AES-GCM', false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: blob.slice(0, 12) }, key, blob.slice(12));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function newChallenge(thread = [], to = '') {
+  const cat = chOut && chOut.cat && CAT[chOut.cat] && (prefs.adult || !CAT[chOut.cat].adult) ? chOut.cat : null;
+  chOut = { thread, to, cat, card: null, redraws: 0, answer: '' };
+  go('ch-new');
+}
+function readHash() {
+  const qs = new URLSearchParams(location.search), hs = new URLSearchParams(location.hash.slice(1));
+  const ch = qs.get('ch');
+  if (ch) {
+    unseal(ch, hs.get('k') || '').then(c => {
+      if (!c || !c.q) throw 0;
+      chIn = { ...c, mine: '', done: false }; history.replaceState(null, '', location.pathname);
+      const idx = (D.q[c.c] || []).indexOf(c.q); if (idx >= 0) markSeen(c.c + ':' + idx);
+      go('ch-recv');
+    }).catch(() => { history.replaceState(null, '', location.pathname); go('home'); err = 'That challenge link is incomplete or broken. Ask them to send it again, and make sure the whole link was copied.'; render(); });
+    app.innerHTML = '<main><p class="muted">Unlocking challenge…</p></main>';
+    return true;
+  }
+  const j = qs.get('join') || '';
+  if (/^[A-Za-z]{4}$/.test(j)) { code = j.toUpperCase(); go('join'); return true; }
+  return false;
+}
+
+/* ---------- views ---------- */
+const catColor = id => (CAT[id] || {}).color || '#666';
+function header(title, sub, back) {
+  return `<header>${back ? `<button class="icon" data-act="${back}" aria-label="Back">‹</button>` : ''}<h1>${esc(title)}</h1>${sub ? `<span class="sub">${sub}</span>` : ''}</header>`;
+}
+function cardHTML(c, label, extra = '') {
+  const cat = CAT[c.cat];
+  const fresh = c.cat + c.text !== lastCardKey; lastCardKey = c.cat + c.text;
+  return `<article class="card ${fresh ? 'deal' : ''}" style="--c:${cat.color}">
+    <div class="top"><span>${esc(cat.name)}</span><small>${label || ''}</small></div>
+    <div class="q">${esc(c.text)}</div><div class="corner">?</div>
+    <div class="foot">${extra}</div></article>`;
+}
+function catGrid(adult, selected, act = 'pickCat') {
+  const tile = c => `<button class="cat" style="--c:${c.color}" data-act="${act}" data-cat="${c.id}" aria-pressed="${selected === c.id}"><b>${esc(c.name)}</b><span>${esc(c.tag)} · ${c.count}</span></button>`;
+  return `<div class="grid">${D.cats.filter(c => !c.adult).map(tile).join('')}
+    <button class="cat surprise" data-act="${act}" data-cat="*"><b>Surprise me</b><span>Any category</span></button></div>
+    ${adult ? `<p class="sect">After dark · 18+</p><div class="grid">${D.cats.filter(c => c.adult).map(tile).join('')}</div>` : ''}`;
+}
+function settingsHTML(s, editable, local) {
+  const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button data-act="set" data-k="${key}" data-v="${v}" aria-pressed="${s[key] == v}" ${editable ? '' : 'disabled'}>${l}</button>`).join('')}</div>`;
+  return `<div class="panel"><h2>House rules</h2>
+    <label>How cards are dealt</label>${seg('deal', [['mix', 'Mix everyone’s picks'], ['next', 'Pick for the next player'], ['own', 'Pick your own']])}
+    <p class="muted">${s.deal === 'mix' ? 'Everyone picks a category, then the picks get shuffled and dealt around.' : s.deal === 'next' ? 'Your pick becomes the card for the player after you.' : 'You answer from the category you picked.'}</p>
+    <label>Cards per player each round</label>${seg('per', [[1, '1'], [2, '2'], [3, '3']])}
+    ${local ? '' : `<label style="margin-top:12px">Answers</label>${seg('answers', [['talk', 'Say it out loud'], ['type', 'Challenge: type & reveal']])}
+    <p class="muted">${s.answers === 'type' ? 'Everyone types an answer to every card. Answers stay hidden until all are in, then everyone sees them at once.' : 'The player whose card it is answers out loud.'}</p>`}
+    <label class="switch"><input type="checkbox" data-act="adult" ${s.adult ? 'checked' : ''} ${editable ? '' : 'disabled'}> <span>Include 18+ categories<br><span class="muted">Dating, Couples, Intimacy and Flirty</span></span></label>
+    ${!editable ? '<p class="muted">The host sets the rules.</p>' : ''}</div>`;
+}
+function playersHTML(g, canKick) {
+  return `<ul class="players">${g.players.map(p => `<li style="--c:${p.color}"><span class="dot"></span><span class="n">${esc(p.name)}${p.id === ME && mode !== 'local' ? ' (you)' : ''}</span>
+    ${g.phase === 'pick' ? (g.picks[p.id] ? '<span class="tag ok">Picked</span>' : p.on ? '<span class="tag">Choosing…</span>' : '') : ''}
+    ${!p.on ? '<span class="tag off">Away</span>' : ''}
+    ${canKick && p.id !== ME ? `<button class="icon" data-act="kick" data-id="${p.id}" aria-label="Remove ${esc(p.name)}">×</button>` : ''}</li>`).join('')}</ul>`;
+}
+const pname = id => ((G.players.find(p => p.id === id) || {}).name || 'Someone');
+
+function vHome() {
+  const fan = ['#ff7a59', '#7c5cff', '#e8a317', '#2a8bdc', '#f25c94'].map((c, i) => `<i style="--c:${c};transform:translateX(-50%) rotate(${(i - 2) * 12}deg)"></i>`).join('');
+  return `<main>
+    <section class="hero"><p class="big">Icebreaker</p><p>${TOTAL.toLocaleString()} questions across ${D.cats.length} categories. Pick a category, get dealt a card, start talking.</p>
+      <div class="fan" aria-hidden="true">${fan}</div></section>
+    <div><label for="nm">Your name</label><input id="nm" data-in="name" value="${esc(myName)}" placeholder="What should we call you?" autocomplete="given-name" maxlength="20"></div>
+    <p class="err">${esc(err)}</p>
+    <div class="menu">
+      <button class="lead" data-act="host"><b>Host a live game</b><span>Get a code. Friends join on their own phones.</span></button>
+      <button data-act="toJoin"><b>Join with a code</b><span>Someone else is hosting.</span></button>
+      <button data-act="local"><b>Play on one phone</b><span>Pass it around the table.</span></button>
+      <button data-act="challenge"><b>Text a challenge</b><span>Answer a card, send it by text, see each other’s answers.</span></button>
+    </div></main>`;
+}
+function vJoin() {
+  return header('Join a game', '', 'home') + `<main>
+    <div><label for="nm">Your name</label><input id="nm" data-in="name" value="${esc(myName)}" maxlength="20" autocomplete="given-name"></div>
+    <div><label for="cd">Game code</label><input id="cd" value="${esc(code)}" maxlength="4" autocapitalize="characters" autocomplete="off" inputmode="text" placeholder="ABCD" style="font:700 32px/1 Fraunces,serif;letter-spacing:.3em;text-align:center;text-transform:uppercase"></div>
+    <p class="err">${esc(err)}</p></main>
+    <div class="bar"><button data-act="join">Join game</button></div>`;
+}
+function vGame() {
+  const g = G, host = isHostView(), local = mode === 'local';
+  const title = local ? 'One phone' : mode === 'host' ? 'Room ' + code : 'Room ' + code;
+  const back = `<button class="icon" data-act="leave" aria-label="Leave game">×</button>`;
+  let h = `<header>${back}<h1>${title}</h1>${g && g.round ? `<span class="sub">Round ${g.round}</span>` : ''}</header>`;
+  if (status) h += `<div class="notice ${/trouble|Lost/.test(status) ? 'warn' : ''}">${esc(status)} ${mode === 'client' && /Lost|trouble|Reconnect/.test(status) ? '<button class="small" data-act="rejoin">Rejoin</button>' : ''}</div>`;
+  if (!g) return h + `<main><p class="muted">Waiting for the host…</p></main>`;
+  const me = g.players.find(p => p.id === ME);
+  if (g.phase === 'lobby') {
+    if (local) return h + `<main>
+      <div class="panel"><h2>Who’s playing?</h2>${playersHTML(g, false).replace(/<\/li>/g, '</li>')}
+        <div class="row" style="margin-top:10px"><input id="newp" placeholder="Add a player" maxlength="20"><button class="small" data-act="addLocal">Add</button></div>
+        ${g.players.length ? `<p class="muted" style="margin-top:8px">Tap a name to remove it.</p>` : ''}</div>
+      ${settingsHTML(g.settings, true, true)}</main>
+      <div class="bar"><button data-act="start" ${g.players.length < 2 ? 'disabled' : ''}>${g.players.length < 2 ? 'Add at least 2 players' : 'Deal round 1'}</button></div>`;
+    const joinUrl = location.origin + location.pathname + '?join=' + code;
+    return h + `<main>
+      ${mode === 'host' ? `<div class="panel center"><p class="muted" style="margin:0">Friends join with this code</p><div class="code">${code}</div>
+        <div class="row"><button class="ghost small" style="flex:1" data-act="shareRoom" data-url="${esc(joinUrl)}">Send invite</button><button class="ghost small" style="flex:1" data-act="copy" data-text="${esc(joinUrl)}">Copy link</button></div>
+        <p class="muted" style="margin:10px 0 0">Keep this screen open. Your phone is the game table.</p></div>` : ''}
+      <div class="panel"><h2>Players · ${active(g).length}</h2>${playersHTML(g, host)}</div>
+      ${settingsHTML(g.settings, host, false)}</main>
+      <div class="bar">${host ? `<button data-act="start" ${active(g).length < 2 ? 'disabled' : ''}>${active(g).length < 2 ? 'Waiting for players…' : 'Start round 1'}</button>` : '<button class="ghost" disabled>Waiting for the host to start</button>'}</div>`;
+  }
+  if (g.phase === 'pick') {
+    const pickerId = local ? (active(g).find(p => !g.picks[p.id]) || {}).id : ME;
+    const picker = g.players.find(p => p.id === pickerId);
+    const waiting = active(g).filter(p => !g.picks[p.id]);
+    if (picker && !g.picks[pickerId]) {
+      const hint = g.settings.deal === 'next' ? 'This picks the card for the next player.' : g.settings.deal === 'own' ? 'You’ll answer from this one.' : 'Everyone’s picks get shuffled together.';
+      return h + `<main><div><p class="h2" style="font-size:26px;margin:0">${local ? esc(picker.name) + ', pick' : 'Pick'} a category</p><p class="muted" style="margin:4px 0 0">${hint}</p></div>
+        ${catGrid(g.settings.adult)}</main>`;
+    }
+    return h + `<main><p class="h2" style="font-size:24px">Waiting on ${waiting.map(p => esc(p.name)).join(', ') || 'the deal'}…</p>${playersHTML(g, host)}</main>
+      ${host ? `<div class="bar"><button class="ghost" data-act="forceDeal">Deal now (random for anyone left)</button></div>` : ''}`;
+  }
+  if (g.phase === 'play') {
+    const c = curCard(g), mine = c.owner === ME, canDrive = host || mine, n = g.queue.length;
+    const by = c.by && g.settings.deal === 'next' ? `Picked by ${esc(pname(c.by))}` : '';
+    const left = REDRAWS - c.redraws;
+    let card = cardHTML(c, `Card ${g.turn + 1} of ${n}`, `<span>${esc(pname(c.owner))}${mine ? ' (you)' : ''}’s card</span><span>${by}</span>`);
+    let body = '', bar = '';
+    const redrawBtn = canDrive && !g.revealed ? `<button class="ghost" data-act="redraw" ${left <= 0 ? 'disabled' : ''}>New card${left > 0 ? ` (${left} left)` : ''}</button>` : '';
+    if (g.settings.answers === 'type' && !local) {
+      const answered = new Set(g.answered || Object.keys(g.answers));
+      const waitingOn = active(g).filter(p => !answered.has(p.id));
+      if (g.revealed) {
+        body = `<p class="h2">Everyone’s answers</p><div class="answers">${g.players.filter(p => g.answers[p.id] != null).map(p => `<div class="ans" style="--c:${p.color}"><b>${esc(p.name)}</b><p>${esc(g.answers[p.id])}</p></div>`).join('')}</div>`;
+        bar = canDrive ? `<button data-act="next">${g.turn + 1 < n ? 'Next card' : 'Finish round'}</button>` : `<button class="ghost" disabled>${esc(pname(c.owner))} moves on</button>`;
+      } else if (me && !answered.has(ME)) {
+        body = `<div><label for="ans">Your answer (hidden until everyone answers)</label><textarea id="ans" data-in="draft" maxlength="600" placeholder="Type your answer…">${esc(draftFor(c))}</textarea></div>
+          <p class="muted">${answered.size} of ${active(g).length} answered</p>`;
+        bar = redrawBtn + `<button data-act="submit">Lock it in</button>`;
+      } else {
+        body = `<div class="notice">Locked in. Waiting on ${waitingOn.map(p => esc(p.name)).join(', ') || 'the reveal'}…</div>`;
+        bar = canDrive ? redrawBtn + `<button data-act="reveal">Reveal now</button>` : '';
+      }
+    } else {
+      body = `<p class="muted center">${local ? `Hand the phone to ${esc(pname(c.owner))}.` : mine ? 'Your turn. Answer out loud.' : `${esc(pname(c.owner))} is answering.`}</p>`;
+      bar = canDrive || local ? redrawBtn + `<button data-act="next">${g.turn + 1 < n ? 'Next card' : 'Finish round'}</button>` : '';
+    }
+    return h + `<main>${card}${body}</main>${bar ? `<div class="bar">${bar}</div>` : ''}`;
+  }
+  if (g.phase === 'end') {
+    return h + `<main><p class="h2" style="font-size:28px;margin:0">Round ${g.round} done</p>
+      <ul class="list">${g.queue.map(c => `<li style="border-left:5px solid ${catColor(c.cat)}"><b>${esc(pname(c.owner))} · ${esc(CAT[c.cat].name)}</b>${esc(c.text)}</li>`).join('')}</ul></main>
+      <div class="bar">${host ? `<button class="ghost" data-act="lobby">Change rules</button><button data-act="round">Next round</button>` : '<button class="ghost" disabled>Waiting for the next round</button>'}</div>`;
+  }
+  return h;
+}
+const drafts = {};
+const draftFor = c => drafts[c.cat + c.text] || '';
+
+function vChNew() {
+  const o = chOut;
+  const last = o.thread.length ? o.thread[o.thread.length - 1] : null;
+  let h = header(o.to ? 'Challenge ' + o.to + ' back' : 'Text a challenge', '', 'home') + '<main>';
+  if (!o.card) {
+    h += `<div class="row" style="justify-content:space-between"><p class="h2" style="margin:0">Pick a category</p>
+      <label class="switch" style="font-size:14px"><input type="checkbox" data-act="chAdult" ${prefs.adult ? 'checked' : ''}> 18+</label></div>
+      ${catGrid(prefs.adult, o.cat, 'chCat')}</main>`;
+    return h;
+  }
+  const left = REDRAWS - o.redraws;
+  h += cardHTML(o.card, 'Your challenge') + `
+    <div><label for="nm">Your name</label><input id="nm" data-in="name" value="${esc(myName)}" maxlength="20" autocomplete="given-name"></div>
+    <div><label for="cha">Your answer</label><textarea id="cha" data-in="chAnswer" maxlength="600" placeholder="They’ll see this after they answer.">${esc(o.answer)}</textarea></div>
+    <p class="err">${esc(err)}</p></main>
+    <div class="bar"><button class="ghost" data-act="chRedraw" ${left <= 0 ? 'disabled' : ''}>New card${left > 0 ? ` (${left})` : ''}</button><button data-act="chSend">Send it</button></div>`;
+  return h;
+}
+function vChSent() {
+  return header('Challenge ready', '', 'home') + `<main>${cardHTML(chOut.card, 'Sent')}
+    <div class="panel"><h2>Send it your way</h2><p class="muted">They answer first, then both answers appear. They can fire one back.</p>
+    <div style="display:grid;gap:10px;margin-top:10px">
+      <button data-act="shareCh">Share…</button>
+      <a class="btn ghost" href="sms:?&body=${encodeURIComponent(chOut.msg + ' ' + chOut.url)}">Open Messages</a>
+      <button class="ghost" data-act="copy" data-text="${esc(chOut.msg + ' ' + chOut.url)}">Copy message</button></div>
+    <p class="err">${esc(err)}</p></div></main>
+    <div class="bar"><button class="ghost" data-act="home">Done</button></div>`;
+}
+function vChRecv() {
+  const c = chIn, cat = CAT[c.c] || D.cats[0];
+  let h = header('Challenge from ' + c.f, '', 'home') + '<main>' + cardHTML({ cat: cat.id, text: c.q }, 'From ' + esc(c.f));
+  if (!c.done) {
+    h += `<div class="ans locked" style="--c:${cat.color}" aria-hidden="true"><b>${esc(c.f)}</b><p>${esc(c.a || 'No answer given')}</p></div>
+      <p class="muted center">Answer to unlock ${esc(c.f)}’s answer.</p>
+      <div><label for="nm">Your name</label><input id="nm" data-in="name" value="${esc(myName)}" maxlength="20" autocomplete="given-name"></div>
+      <div><label for="mine">Your answer</label><textarea id="mine" data-in="chMine" maxlength="600">${esc(c.mine)}</textarea></div>
+      <p class="err">${esc(err)}</p></main><div class="bar"><button data-act="chReveal">Reveal both</button></div>`;
+    return h;
+  }
+  const thread = (c.t || []);
+  h += `<div class="answers"><div class="ans" style="--c:${cat.color}"><b>${esc(c.f)}</b><p>${esc(c.a || '(no answer)')}</p></div>
+    <div class="ans" style="--c:var(--acc)"><b>${esc(myName || 'You')}</b><p>${esc(c.mine)}</p></div></div>
+    ${thread.length ? `<details class="panel"><summary>Earlier in this thread (${thread.length})</summary><ul class="list">${thread.map(x => `<li style="border-left:5px solid ${catColor(x.c)}"><b>${esc(x.q)}</b>${esc(x.f)}: ${esc(x.a)}<br>${esc(x.n)}: ${esc(x.r)}</li>`).join('')}</ul></details>` : ''}
+    </main><div class="bar"><button data-act="chBack">Challenge ${esc(c.f)} back</button></div>`;
+  return h;
+}
+
+function render() {
+  const focus = document.activeElement && document.activeElement.id, sel = focus && document.activeElement.selectionStart;
+  app.innerHTML = view === 'home' ? vHome() : view === 'join' ? vJoin() : view === 'game' ? vGame() : view === 'ch-new' ? vChNew() : view === 'ch-sent' ? vChSent() : view === 'ch-recv' ? vChRecv() : vHome();
+  if (focus) { const el = document.getElementById(focus); if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(sel, sel); } catch (e) {} } }
+}
+
+/* ---------- events ---------- */
+app.addEventListener('input', e => {
+  const k = e.target.dataset.in;
+  if (k === 'name') { myName = e.target.value; store.set('name', myName); }
+  if (k === 'draft' && G) { const c = curCard(G); if (c) drafts[c.cat + c.text] = e.target.value; }
+  if (k === 'chAnswer') chOut.answer = e.target.value;
+  if (k === 'chMine') chIn.mine = e.target.value;
+});
+app.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'newp') { e.preventDefault(); H.addLocal(); }
+  if (e.target.id === 'cd') { e.preventDefault(); H.join(); }
+});
+app.addEventListener('change', e => {
+  const a = e.target.dataset.act;
+  if (a === 'adult') setSetting('adult', e.target.checked);
+  if (a === 'chAdult') { prefs.adult = e.target.checked; store.set('prefs', prefs); render(); }
+});
+function setSetting(k, v) {
+  prefs[k] = v; store.set('prefs', prefs);
+  if (mode === 'local') { G.settings[k] = v; render(); } else send({ t: 'settings', s: { [k]: v } });
+}
+async function share(text, url) {
+  try { if (navigator.share) { await navigator.share({ text, url }); return true; } } catch (e) { if (e.name === 'AbortError') return true; }
+  return copy(text + ' ' + url);
+}
+async function copy(t) {
+  try { await navigator.clipboard.writeText(t); err = 'Copied.'; } catch (e) { err = 'Couldn’t copy. Press and hold to copy: ' + t; }
+  render(); return true;
+}
+const H = {
+  home: () => { if (mode) leaveGame(); else { history.replaceState(null, '', location.pathname); go('home'); } },
+  host: () => { if (!myName.trim()) { err = 'Add your name first.'; render(); document.getElementById('nm').focus(); return; } hostGame(); },
+  toJoin: () => go('join'),
+  join: () => joinGame(document.getElementById('cd').value),
+  rejoin: () => { try { peer && peer.destroy(); } catch (e) {} peer = null; joinGame(code); },
+  local: startLocal,
+  leave: leaveGame,
+  challenge: () => newChallenge(),
+  addLocal: () => {
+    const el = document.getElementById('newp'), n = el.value.trim(); if (!n) return;
+    act(G, rid(), { t: 'join', name: n }); store.set('localPlayers', G.players.map(p => p.name)); render();
+    document.getElementById('newp').focus();
+  },
+  kick: d => {
+    if (mode === 'local') { G.players = G.players.filter(p => p.id !== d.id); store.set('localPlayers', G.players.map(p => p.name)); render(); }
+    else send({ t: 'kick', id: d.id });
+  },
+  set: d => setSetting(d.k, d.k === 'per' ? +d.v : d.v),
+  start: () => send({ t: 'start' }, mode === 'local' ? 'local' : ME),
+  round: () => send({ t: 'round' }, mode === 'local' ? 'local' : ME),
+  lobby: () => send({ t: 'lobby' }, mode === 'local' ? 'local' : ME),
+  forceDeal: () => send({ t: 'forceDeal' }),
+  pickCat: d => {
+    const cat = d.cat === '*' ? pickOne(cats(G.settings.adult)).id : d.cat;
+    const as = mode === 'local' ? (active(G).find(p => !G.picks[p.id]) || {}).id : ME;
+    if (as) send({ t: 'pick', cat }, as);
+  },
+  redraw: () => send({ t: 'redraw' }, mode === 'local' ? 'local' : ME),
+  next: () => send({ t: 'next' }, mode === 'local' ? 'local' : ME),
+  reveal: () => send({ t: 'reveal' }),
+  submit: () => { const c = curCard(G); send({ t: 'answer', text: drafts[c.cat + c.text] || '' }); },
+  shareRoom: d => share(`Join my Icebreaker game! Code ${code}:`, d.url),
+  copy: d => copy(d.text),
+  chCat: d => { const id = d.cat === '*' ? pickOne(cats(prefs.adult)).id : d.cat; chOut.cat = id; chOut.card = draw(id); chOut.redraws = 0; render(); },
+  chRedraw: () => { if (chOut.redraws >= REDRAWS) return; chOut.redraws++; chOut.card = draw(chOut.card.cat); render(); },
+  chSend: async () => {
+    if (!myName.trim()) { err = 'Add your name so they know who it’s from.'; render(); return; }
+    if (!chOut.answer.trim()) { err = 'Answer it yourself first. That’s the deal.'; render(); return; }
+    const payload = { v: 1, f: myName.trim(), c: chOut.card.cat, q: chOut.card.text, a: chOut.answer.trim(), t: chOut.thread.slice(-6) };
+    let sealed;
+    try { sealed = await seal(payload); } catch (e) { err = 'This browser can’t encrypt the link. Open the site over https.'; render(); return; }
+    chOut.url = location.origin + location.pathname + '?ch=' + sealed.ch + '#k=' + sealed.k;
+    chOut.msg = `${myName.trim()} sent you an Icebreaker challenge: “${chOut.card.text}” Answer to see theirs →`;
+    go('ch-sent');
+  },
+  shareCh: () => share(chOut.msg, chOut.url),
+  chReveal: () => {
+    if (!myName.trim()) { err = 'Add your name.'; render(); return; }
+    if (!chIn.mine.trim()) { err = 'Type your answer to unlock theirs.'; render(); return; }
+    chIn.done = true; render();
+  },
+  chBack: () => {
+    const thread = [...(chIn.t || []), { c: chIn.c, q: chIn.q, f: chIn.f, a: chIn.a, n: myName.trim(), r: chIn.mine.trim() }].slice(-6);
+    history.replaceState(null, '', location.pathname);
+    chOut = null; newChallenge(thread, chIn.f);
+  },
+};
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (b && H[b.dataset.act] && b.tagName !== 'INPUT') { e.preventDefault(); H[b.dataset.act](b.dataset, b); return; }
+  const li = e.target.closest('.players li');
+  if (li && mode === 'local' && G && G.phase === 'lobby') {
+    const i = [...li.parentNode.children].indexOf(li); G.players.splice(i, 1); store.set('localPlayers', G.players.map(p => p.name)); render();
+  }
+});
+window.addEventListener('beforeunload', () => { if (mode === 'client' && conn && conn.open) conn.send({ t: 'leave' }); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if (!readHash()) render();
+}
+</script>
+</body>
+</html>
